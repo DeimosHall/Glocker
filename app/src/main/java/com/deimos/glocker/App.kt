@@ -82,7 +82,7 @@ fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo) {
             elevation = 10.dp,
             shape = RoundedCornerShape(16.dp)
         ) {
-            Column {
+            Column(modifier = Modifier.padding(10.dp)) {
                 Column {
                     options.forEach { MyCheckbox(checkboxInfo = it) }
                 }
