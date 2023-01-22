@@ -19,22 +19,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MyApp() {
     val myOptions = getOptions(titles = listOf("Capital letters", "Numbers", "Symbols"))
     val mySlider = getSliderInfo()
 
-    Box(modifier = Modifier.padding(25.dp)) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            //MyCard(myOptions, mySlider)
-            TopContent(options = myOptions, slider = mySlider)
-            GenerateButton()
+    Column {
+        MyTitle()
+        Box(modifier = Modifier.padding(25.dp)) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                //MyCard(myOptions, mySlider)
+                TopContent(options = myOptions, slider = mySlider)
+                GenerateButton()
+            }
         }
     }
 }
@@ -44,6 +49,13 @@ fun TopContent(options: List<CheckboxInfo>, slider: SliderInfo) {
     Column {
         LockIcon()
         MyCard(options = options, slider = slider)
+    }
+}
+
+@Composable
+fun MyTitle() {
+    Box(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), contentAlignment = Alignment.Center) {
+        Text(text = "Glocker", fontSize = 25.sp, fontWeight = FontWeight.Bold)
     }
 }
 
