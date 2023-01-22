@@ -3,8 +3,12 @@ package com.deimos.glocker
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,25 +17,47 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun MyApp() {
-    val context = LocalContext.current
     val myOptions = getOptions(titles = listOf("Capital letters", "Numbers", "Symbols"))
-    var length by rememberSaveable { mutableStateOf(16f) }
     val mySlider = getSliderInfo()
 
     Box(modifier = Modifier.padding(25.dp)) {
-        Column {
-            MyCard(myOptions, mySlider)
-            Button(onClick = {
-                Log.d("MYTAG", "Lenght: ${mySlider.position}")
-            }) {
-                Text(text = "Button")
-            }
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            //MyCard(myOptions, mySlider)
+            TopContent(options = myOptions, slider = mySlider)
+            GenerateButton()
         }
+    }
+}
+
+@Composable
+fun TopContent(options: List<CheckboxInfo>, slider: SliderInfo) {
+    Column {
+        LockIcon()
+        MyCard(options = options, slider = slider)
+    }
+}
+
+@Composable
+fun LockIcon() {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 20.dp, bottom = 40.dp),
+        contentAlignment = Alignment.Center) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_lock_100),
+            contentDescription = "Lock icon",
+            modifier = Modifier.size(120.dp)
+        )
     }
 }
 
@@ -41,15 +67,54 @@ fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo) {
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
-            elevation = 10.dp
+            elevation = 10.dp,
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column {
                 Column {
                     options.forEach { MyCheckbox(checkboxInfo = it) }
                 }
+                PasswordLength(slider = slider)
                 MySlider(slider)
+                PasswordField()
             }
         }
+    }
+}
+
+@Composable
+fun GenerateButton() {
+    Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+        Text(text = "Generate")
+    }
+}
+
+@Composable
+fun PasswordField() {
+    Box(modifier = Modifier.padding(15.dp)) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = "",
+            onValueChange = {},
+            placeholder = { Text(text = "Password") },
+            shape = RoundedCornerShape(16.dp),
+            enabled = false,
+            trailingIcon = {
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_content_copy_24),
+                        contentDescription = "Copy icon"
+                    )
+                }
+            }
+        )
+    }
+}
+
+@Composable
+fun PasswordLength(slider: SliderInfo) {
+    Box(modifier = Modifier.padding(start = 15.dp, bottom = 10.dp, top = 15.dp)) {
+        Text(text = "Length: ${slider.position.toInt()}")
     }
 }
 
@@ -90,12 +155,10 @@ fun getSliderInfo(): SliderInfo {
 @Composable
 fun MySlider(sliderInfo: SliderInfo) {
     var position by rememberSaveable { mutableStateOf(sliderInfo.position) }
-    var completedPosition by rememberSaveable { mutableStateOf("") }
     Slider(
         modifier = Modifier.padding(start = 15.dp, end = 15.dp),
         value = sliderInfo.position,
         onValueChange = { sliderInfo.onSliderChange(it) },
-        onValueChangeFinished = { completedPosition = sliderInfo.position.toString() },
         valueRange = 5f..20f,
         steps = 14
     )
