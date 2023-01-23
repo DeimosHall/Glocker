@@ -1,5 +1,7 @@
 package com.deimos.glocker
 
+import android.content.ClipData
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
@@ -16,17 +18,32 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContentProviderCompat.requireContext
+import com.deimos.glocker.ui.theme.GlockerTheme
+
+@Preview(showBackground = true)
+@Composable
+fun MyPreview() {
+    GlockerTheme {
+        MyApp()
+    }
+}
 
 @Composable
 fun MyApp() {
     val myOptions = getOptions(titles = listOf("Capital letters", "Numbers", "Symbols"))
     val mySlider = getSliderInfo()
+    val myPassword = getPassword()
+    val context = LocalContext.current
 
     Column {
         MyTitle()
@@ -36,35 +53,40 @@ fun MyApp() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                //MyCard(myOptions, mySlider)
-                TopContent(options = myOptions, slider = mySlider)
-                GenerateButton()
+                TopContent(options = myOptions, slider = mySlider, myPassword, context)
+                GenerateButton(options = myOptions, slider = mySlider, myPassword)
             }
         }
     }
 }
 
 @Composable
-fun TopContent(options: List<CheckboxInfo>, slider: SliderInfo) {
+fun TopContent(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
     Column {
         LockIcon()
-        MyCard(options = options, slider = slider)
+        MyCard(options = options, slider = slider, password = password, context)
     }
 }
 
 @Composable
 fun MyTitle() {
-    Box(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp), contentAlignment = Alignment.Center
+    ) {
         Text(text = "Glocker", fontSize = 25.sp, fontWeight = FontWeight.Bold)
     }
 }
 
 @Composable
 fun LockIcon() {
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(top = 20.dp, bottom = 40.dp),
-        contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 20.dp, bottom = 40.dp),
+        contentAlignment = Alignment.Center
+    ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_lock_100),
             contentDescription = "Lock icon",
@@ -74,7 +96,7 @@ fun LockIcon() {
 }
 
 @Composable
-fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo) {
+fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
     Box {
         Card(
             modifier = Modifier
@@ -88,31 +110,50 @@ fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo) {
                 }
                 PasswordLength(slider = slider)
                 MySlider(slider)
-                PasswordField()
+                PasswordField(options = options, slider = slider, password = password, context)
             }
         }
     }
 }
 
 @Composable
-fun GenerateButton() {
-    Button(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
+fun GenerateButton(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo) {
+    val passwordManager = PasswordManager()
+    val myPassword = passwordManager.generate(
+        hasCapLetters = options[0].selected,
+        hasNumbers = options[1].selected,
+        hasSymbols = options[2].selected,
+        length = slider.position.toInt()
+    )
+    Button(onClick = { password.onValueChange(myPassword) }, modifier = Modifier.fillMaxWidth()) {
         Text(text = "Generate")
     }
 }
 
 @Composable
-fun PasswordField() {
+fun getPassword(): PasswordInfo {
+    var password by rememberSaveable { mutableStateOf("") }
+    return PasswordInfo(value = password, onValueChange = { password = it })
+}
+
+fun copyToClipboard(context: Context, text: String) {
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+    val clip = ClipData.newPlainText("password", text)
+    clipboardManager.setPrimaryClip(clip)
+}
+
+@Composable
+fun PasswordField(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
     Box(modifier = Modifier.padding(15.dp)) {
         OutlinedTextField(
             modifier = Modifier.fillMaxWidth(),
-            value = "",
+            value = password.value,
             onValueChange = {},
             placeholder = { Text(text = "Password") },
             shape = RoundedCornerShape(16.dp),
             enabled = false,
             trailingIcon = {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = { copyToClipboard(context = context, text = password.value) }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_content_copy_24),
                         contentDescription = "Copy icon"

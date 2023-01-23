@@ -1,6 +1,6 @@
 package com.deimos.glocker
 
-class Password {
+class PasswordManager {
     fun generate(hasNumbers: Boolean, hasCapLetters: Boolean, hasSymbols: Boolean, length: Int): String {
         val symbolsList = listOf('!', '@', '#', '$', '%', '^', '&', '*')
         val numbersList = ('0'..'9').toList()
