@@ -1,16 +1,12 @@
 package com.deimos.glocker
 
 import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,8 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -27,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContentProviderCompat.requireContext
 import com.deimos.glocker.ui.theme.GlockerTheme
 
 @Preview(showBackground = true)
@@ -61,7 +54,12 @@ fun MyApp() {
 }
 
 @Composable
-fun TopContent(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
+fun TopContent(
+    options: List<CheckboxInfo>,
+    slider: SliderInfo,
+    password: PasswordInfo,
+    context: Context
+) {
     Column {
         LockIcon()
         MyCard(options = options, slider = slider, password = password, context)
@@ -96,13 +94,15 @@ fun LockIcon() {
 }
 
 @Composable
-fun MyCard(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
+fun MyCard(
+    options: List<CheckboxInfo>,
+    slider: SliderInfo,
+    password: PasswordInfo,
+    context: Context
+) {
     Box {
         Card(
-            modifier = Modifier
-                .fillMaxWidth(),
-            elevation = 10.dp,
-            shape = RoundedCornerShape(16.dp)
+            modifier = Modifier.fillMaxWidth(), elevation = 10.dp, shape = RoundedCornerShape(16.dp)
         ) {
             Column(modifier = Modifier.padding(10.dp)) {
                 Column {
@@ -137,30 +137,38 @@ fun getPassword(): PasswordInfo {
 }
 
 fun copyToClipboard(context: Context, text: String) {
-    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     val clip = ClipData.newPlainText("password", text)
     clipboardManager.setPrimaryClip(clip)
 }
 
 @Composable
-fun PasswordField(options: List<CheckboxInfo>, slider: SliderInfo, password: PasswordInfo, context: Context) {
+fun PasswordField(
+    options: List<CheckboxInfo>,
+    slider: SliderInfo,
+    password: PasswordInfo,
+    context: Context
+) {
     Box(modifier = Modifier.padding(15.dp)) {
-        OutlinedTextField(
-            modifier = Modifier.fillMaxWidth(),
+        OutlinedTextField(modifier = Modifier.fillMaxWidth(),
             value = password.value,
             onValueChange = {},
             placeholder = { Text(text = "Password") },
             shape = RoundedCornerShape(16.dp),
             enabled = false,
             trailingIcon = {
-                IconButton(onClick = { copyToClipboard(context = context, text = password.value) }) {
+                IconButton(onClick = {
+                    copyToClipboard(
+                        context = context,
+                        text = password.value
+                    )
+                }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_content_copy_24),
                         contentDescription = "Copy icon"
                     )
                 }
-            }
-        )
+            })
     }
 }
 
@@ -174,16 +182,12 @@ fun PasswordLength(slider: SliderInfo) {
 @Composable
 fun MyCheckbox(checkboxInfo: CheckboxInfo) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Start
     ) {
-        Checkbox(
-            checked = checkboxInfo.selected,
+        Checkbox(checked = checkboxInfo.selected,
             onCheckedChange = { checkboxInfo.onCheckedChange(!checkboxInfo.selected) })
-        ClickableText(
-            text = AnnotatedString(checkboxInfo.title),
-            onClick = { checkboxInfo.onCheckedChange(!checkboxInfo.selected) }
-        )
+        ClickableText(text = AnnotatedString(checkboxInfo.title),
+            onClick = { checkboxInfo.onCheckedChange(!checkboxInfo.selected) })
     }
 }
 
@@ -191,11 +195,7 @@ fun MyCheckbox(checkboxInfo: CheckboxInfo) {
 fun getOptions(titles: List<String>): List<CheckboxInfo> {
     return titles.map { title ->
         var status by rememberSaveable { mutableStateOf(false) }
-        CheckboxInfo(
-            title = title,
-            selected = status,
-            onCheckedChange = { status = it }
-        )
+        CheckboxInfo(title = title, selected = status, onCheckedChange = { status = it })
     }
 }
 
