@@ -201,7 +201,7 @@ fun getOptions(titles: List<String>): List<CheckboxInfo> {
 
 @Composable
 fun getSliderInfo(): SliderInfo {
-    var position by rememberSaveable { mutableStateOf(8f) }
+    var position by rememberSaveable { mutableStateOf(16f) }
     return SliderInfo(position, onSliderChange = { position = it })
 }
 
